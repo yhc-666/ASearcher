@@ -9,11 +9,12 @@ ASearcher is an open-source framework designed for large-scale online reinforcem
 
 **ASearcher Highlights**
 
-+ 🔁 Data Synthesis: We introduce a prompt-based LLM agent that autonomously generates grounded, challenging, and highly uncertain QA pairs to enhance training diversity.
-+ ⚡ Fully Asynchronous RL: Our scalable agentic RL framework decouples trajectory collection from model training, eliminating GPU idle time and enabling efficient long-horizon reasoning.
-+ 🌐 Long-Horizon RL: ASearcher exhibits long-horizon search, with tool calls exceeding 40 rounds and generated tokens surpassing 150k during RL training. 
-+ 🏆 Cutting-Edge Performance: ASearcher delivers significant improvements, achieving 46.7% and 20.8% gains on xBench-DeepSearch and GAIA, respectively, through RL training. These results also surpass other open-source search agents.
-+ 🛠️ Fully Open-Source: We are committed to open-sourcing all components for agentic RL training, including datasets, synthetic data pipelines, training details, model weights, and detailed guidelines for custom agent development.<font style="color:#DF2A3F;"> The released models and data could be found at [🤗Huggingface](https://huggingface.co/collections/inclusionAI/asearcher-6891d8acad5ebc3a1e1fb2d1) </font>.
++ 🔁 **Data Synthesis Agent**: We introduce a prompt-based LLM agent that autonomously generates grounded, challenging, and highly uncertain QA pairs to enhance training diversity.
++ ⚡ **Fully Asynchronous Agentic RL**: Our scalable agentic RL framework decouples trajectory collection from model training, eliminating GPU idle time and enabling efficient long-horizon RL training.
++ 🌐 **Emergent Long-Horizon Search**: ASearcher exhibits long-horizon search, with tool calls exceeding 40 rounds and generated tokens surpassing 150k during RL training. 
++ 🏆 **Cutting-Edge Performance**: With a simple agent design, ASearcher achieves *Avg@4 scores of 52.8, 42.1, and 70.9* on GAIA, xBench-DeepSearch, and Frames, respectively, surpassing other open-source search agents. ASearcher achieves *Pass@4 scores of 70.1, 68.0, and 84.0* on GAIA, xBench-DeepSearch, and Frames.
++ 📈 **Substantial Improvement Through RL**: RL training  brings improvements of *+9.1, +13.4, and +12.0* on GAIA, xBench-DeepSearch, and Frames, respectively.
++ 🛠️ **Fully Open-Source**: We are committed to open-sourcing all components for agentic RL training, including datasets, data synthesis agent, training details, model weights, and detailed guidelines for customized agent development.<font style="color:#DF2A3F;"> The released models and data could be found at [🤗Huggingface](https://huggingface.co/collections/inclusionAI/asearcher-6891d8acad5ebc3a1e1fb2d1) </font>.
 
 
 
