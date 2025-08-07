@@ -5,7 +5,7 @@ Reinforcement Learning Project for Search Agents
 
 <p align="center">| <a href="assets/ASearcher.pdf"><b>Paper</b></a> | <a href="https://huggingface.co/datasets/inclusionAI/ASearcher-train-data"><b>🤗 Datasets</b></a> | <a href="https://huggingface.co/collections/inclusionAI/asearcher-6891d8acad5ebc3a1e1fb2d1"><b>🤗 Models</b></a> | </p>
 
-ASearcher is an open-source framework designed for large-scale online reinforcement learning (RL) training of search agents. Our mission is to advance Search Intelligence to expert-level performance. We are fully committed to open-source by releasing model weights, detailed training methodologies, and data construction pipelines. Additionally, we provide comprehensive guidance on building and training customized agents based on AReaL. ASearcher empowers developers to build their own high-performance search agents easily and cost-effectively.
+ASearcher is an open-source framework designed for large-scale online reinforcement learning (RL) training of search agents. Our mission is to advance Search Intelligence to expert-level performance. We are fully committed to open-source by releasing model weights, detailed training methodologies, and data synthesis pipelines. Additionally, we provide comprehensive guidance on building and training customized agents based on AReaL. ASearcher empowers developers to build their own high-performance search agents easily and cost-effectively.
 
 **ASearcher Highlights**
 
