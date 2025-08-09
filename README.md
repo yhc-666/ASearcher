@@ -3,7 +3,9 @@
 Reinforcement Learning Project for Search Agents
 </h1>
 
-<p align="center">| <a href="assets/ASearcher.pdf"><b>Paper</b></a> | <a href="https://huggingface.co/datasets/inclusionAI/ASearcher-train-data"><b>🤗 Datasets</b></a> | <a href="https://huggingface.co/collections/inclusionAI/asearcher-6891d8acad5ebc3a1e1fb2d1"><b>🤗 Models</b></a> | </p>
+<p align="center">| <a href="assets/ASearcher.pdf"><b>📰 Paper</b></a> | <a href="https://huggingface.co/datasets/inclusionAI/ASearcher-train-data"><b>🤗 Datasets</b></a> | <a href="https://huggingface.co/collections/inclusionAI/asearcher-6891d8acad5ebc3a1e1fb2d1"><b>🤗 Models</b></a> | </p>
+
+# Introduction
 
 ASearcher is an open-source framework designed for large-scale online reinforcement learning (RL) training of search agents. Our mission is to advance Search Intelligence to expert-level performance. We are fully committed to open-source by releasing model weights, detailed training methodologies, and data synthesis pipelines. Additionally, we provide comprehensive guidance on building and training customized agents based on AReaL. ASearcher empowers developers to build their own high-performance search agents easily and cost-effectively.
 
@@ -11,28 +13,28 @@ ASearcher is an open-source framework designed for large-scale online reinforcem
 
 + 🔁 **Data Synthesis Agent**: We introduce a prompt-based LLM agent that autonomously generates grounded, challenging, and highly uncertain QA pairs to enhance training diversity.
 + ⚡ **Fully Asynchronous Agentic RL**: Our scalable agentic RL framework decouples trajectory collection from model training, eliminating GPU idle time and enabling efficient long-horizon RL training.
-+ 🌐 **Emergent Long-Horizon Search**: ASearcher exhibits long-horizon search, with tool calls exceeding 40 rounds and generated tokens surpassing 150k during RL training. 
-+ 🏆 **Cutting-Edge Performance**: With a simple agent design, ASearcher achieves *Avg@4 scores of 52.8, 42.1, and 70.9* on GAIA, xBench-DeepSearch, and Frames, respectively, surpassing other open-source search agents. ASearcher achieves *Pass@4 scores of 70.1, 68.0, and 84.0* on GAIA, xBench-DeepSearch, and Frames.
-+ 📈 **Substantial Improvement Through RL**: RL training  brings improvements of *+9.1, +13.4, and +12.0* on GAIA, xBench-DeepSearch, and Frames, respectively.
++ 🌐 **RL Enables Long-Horizon Search**: Through RL training, ASearcher exhibits long-horizon search, with tool calls exceeding 40 rounds and generated tokens surpassing 150k during RL training. 
++ 🏆 **Cutting-Edge Performance**: With a simple agent design and no external LLMs, ASearcher achieves *Avg@4 scores of 52.8, 42.1, and 70.9* on GAIA, xBench-DeepSearch, and Frames, respectively, surpassing other open-source search agents on the same 32B scale. ASearcher achieves *Pass@4 scores of 70.1, 68.0, and 84.0* on GAIA, xBench-DeepSearch, and Frames.
++ 📈 **Substantial Improvement Through RL**: RL training  brings improvements of *+9.1, +13.4, and +12.0* Avg@4 scores on GAIA, xBench-DeepSearch, and Frames, respectively.
 + 🛠️ **Fully Open-Source**: We are committed to open-sourcing all components for agentic RL training, including datasets, data synthesis agent, training details, model weights, and detailed guidelines for customized agent development.<font style="color:#DF2A3F;"> The released models and data could be found at [🤗Huggingface](https://huggingface.co/collections/inclusionAI/asearcher-6891d8acad5ebc3a1e1fb2d1) </font>.
 
-
+**📰 News & Updates**:
+- 2025-08-05: **ASearcher** is released, try asynchronous RL training and automatic QA synthesis to train an advanced search agent!🎉
 
 # Results Showcase
 We evaluate our approach on challenging QA benchmarks (GAIA, xBench-DeepSearch, and Frames), which test advanced problem-solving abilities and web search strategies. These benchmarks are specifically designed to assess an agent's capability to interact with the real web and retrieve up-to-date information, often beyond the internal knowledge of LLMs.
 
-Our agent, [ASearcher-Web-QwQ](https://huggingface.co/inclusionAI/ASearcher-Web-QwQ), achieves state-of-the-art performance among open-source agents, with the highest Avg@4 scores on GAIA and xBench. Additionally, we report Pass@4, which measures the ratio of questions where the agent finds the correct answer within four trials. [ASearcher-Web-QwQ](https://huggingface.co/inclusionAI/ASearcher-Web-QwQ) also outperforms existing open-source agents in terms of pass rate, further demonstrating its robustness.
+**Cutting-Edge Performance.** Our agent, [ASearcher-Web-QwQ](https://huggingface.co/inclusionAI/ASearcher-Web-QwQ), achieves state-of-the-art performance among open-source agents, with the highest Avg@4 scores on GAIA and xBench. Additionally, we report Pass@4, which measures the ratio of questions where the agent finds the correct answer within four trials. [ASearcher-Web-QwQ](https://huggingface.co/inclusionAI/ASearcher-Web-QwQ) also outperforms existing open-source agents in terms of pass rate, further demonstrating its robustness.
 
 ![](assets/32B-results.png)
 
- <div style="text-align:center"> Fig.1 The performance of various methods based on 32B-scale models on GAIA, xBench-DeepSearch, and frames. Avg@4 and Pass@4 are reported </div>
+<p align="center"> Fig.1 The performance of various methods based on 32B-scale models on GAIA, xBench-DeepSearch, and frames. Avg@4 and Pass@4 are reported  </p>
 
 
-
-When comparing performance before and after reinforcement learning (RL), [ASearcher-Web-QwQ](https://huggingface.co/inclusionAI/ASearcher-Web-QwQ) achieves improvements of +9.1, +13.4, and +12.0 on GAIA, xBench-DeepSearch, and Frames, respectively. In terms of pass rate (Pass@4), [ASearcher-Web-QwQ](https://huggingface.co/inclusionAI/ASearcher-Web-QwQ) also demonstrates significant gains—particularly on xBench-DeepSearch, where it shows a remarkable improvement of 17.0.
+**Substantial Improvements Through RL.** When comparing performance before and after reinforcement learning (RL), [ASearcher-Web-QwQ](https://huggingface.co/inclusionAI/ASearcher-Web-QwQ) achieves improvements of +9.1, +13.4, and +12.0 on GAIA, xBench-DeepSearch, and Frames, respectively. In terms of pass rate (Pass@4), [ASearcher-Web-QwQ](https://huggingface.co/inclusionAI/ASearcher-Web-QwQ) also demonstrates significant gains—particularly on xBench-DeepSearch, where it shows a remarkable improvement of 17.0.
 
 ![](assets/before_after_rl.png)
- <div style="text-align:center"> Fig.2 Comparison of the performance of QwQ-32B agent before and after RL Training. </div>
+<p align="center"> Fig.2 Comparison of the performance of QwQ-32B agent before and after RL Training. </p>
 
 
 
@@ -51,7 +53,8 @@ Each generated question undergoes rigorous multi-stage validation:
 
 
 ![](assets/data-synthesis-agent.png)
- <div style="text-align:center"> Fig.3 Data Synthesis Agent. </div>
+
+<p align="center"> Fig.3 Data Synthesis Agent. </p>
 
 # Fully Asynchronous Agentic RL training
 
@@ -59,17 +62,15 @@ Our analysis reveals significant **variance in the execution time of agent traje
 
 ![](assets/turns_gen_tokens.png)
 
- <div style="text-align:center"> Fig.4 (Left) Number of turns versus training steps. (Right) Number of generated tokens versus training steps. </div>
+<p align="center"> Fig.4 (Left) Number of turns versus training steps. (Right) Number of generated tokens versus training steps. </p>
 
-$$
-\\
-$$
  
-**Fuly Asynchronous RL Training Enables Long-Horizon Tool Use.** In batch-generation RL systems, a batch must wait for the longest trajectory to complete, resulting in significant GPU idle time. In contrast, fully asynchronous reinforcement learning (RL) eliminates this bottleneck by completely decoupling training from trajectory generation. This allows relaxed turn limits (e.g., 128 turns/trajectory), enabling agents to explore deeper search paths without sacrificing training efficiency. Remarkably, our agent, ASearcher-Web-QwQ, achieves extreme long-horizon search, **with tool calls exceeding 40 turns and generated tokens surpassing 150k during RL training.
+**Fuly Asynchronous RL Training Enables Long-Horizon Tool Use.** In batch-generation RL systems, a batch must wait for the longest trajectory to complete, resulting in significant GPU idle time. In contrast, fully asynchronous reinforcement learning (RL) eliminates this bottleneck by completely decoupling training from trajectory generation. This allows relaxed turn limits (e.g., 128 turns/trajectory), enabling agents to explore deeper search paths without sacrificing training efficiency. Remarkably, our agent, ASearcher-Web-QwQ, achieves extreme long-horizon search, **with tool calls exceeding 40 turns and generated tokens surpassing 150k during RL training**.
 
 ![](assets/one-step_vs_fully-async.png)
 
- <div style="text-align:center"> Fig.5 Illustration of full fully asynchronous RL Training. </div>
+<p align="center"> Fig.5 Illustration of full fully asynchronous RL Training. </p>
+ 
 
 # Quick Start
 ## Evaluation
