@@ -3,7 +3,7 @@
 Reinforcement Learning Project for Search Agents
 </h1>
 
-<p align="center">| <a href="assets/ASearcher.pdf"><b>📰 Paper</b></a> | <a href="https://huggingface.co/datasets/inclusionAI/ASearcher-train-data"><b>🤗 Datasets</b></a> | <a href="https://huggingface.co/collections/inclusionAI/asearcher-6891d8acad5ebc3a1e1fb2d1"><b>🤗 Models</b></a> | </p>
+<p align="center">| <a href="https://arxiv.org/abs/2508.07976"><b>📰 Paper</b></a> | <a href="https://huggingface.co/datasets/inclusionAI/ASearcher-train-data"><b>🤗 Datasets</b></a> | <a href="https://huggingface.co/collections/inclusionAI/asearcher-6891d8acad5ebc3a1e1fb2d1"><b>🤗 Models</b></a> | </p>
 
 # Introduction
 
@@ -19,6 +19,7 @@ ASearcher is an open-source framework designed for large-scale online reinforcem
 + 🛠️ **Fully Open-Source**: We are committed to open-sourcing all components for agentic RL training, including datasets, data synthesis agent, training details, model weights, and detailed guidelines for customized agent development.<font style="color:#DF2A3F;"> The released models and data could be found at [🤗Huggingface](https://huggingface.co/collections/inclusionAI/asearcher-6891d8acad5ebc3a1e1fb2d1) </font>.
 
 **📰 News & Updates**:
+- 2025-08-09: Our [technical report](assets/ASearcher.pdf) is released.
 - 2025-08-05: **ASearcher** is released, try asynchronous RL training and automatic QA synthesis to train an advanced search agent!🎉
 
 # Results Showcase
@@ -177,3 +178,19 @@ Our team has also received invaluable assistance from the following groups:
 - The Super Computing Technology (SCT) team at Ant Group, particularly for their specialized knowledge in large-scale cluster management and operations
 
 We are also grateful for the foundational work and inspiration provided by the research community, including but not limited to [Search-o1](https://search-o1.github.io/), [Search-R1](https://github.com/PeterGriffinJin/Search-R1) and [WebAgent](https://github.com/Alibaba-NLP/WebAgent).
+
+## Citation
+
+Please cite our work if you find our work useful!
+
+```
+@misc{gao2025turnsunlockinglonghorizonagentic,
+      title={Beyond Ten Turns: Unlocking Long-Horizon Agentic Search with Large-Scale Asynchronous RL}, 
+      author={Jiaxuan Gao and Wei Fu and Minyang Xie and Shusheng Xu and Chuyi He and Zhiyu Mei and Banghua Zhu and Yi Wu},
+      year={2025},
+      eprint={2508.07976},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2508.07976}, 
+}
+```
