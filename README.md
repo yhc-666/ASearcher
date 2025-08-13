@@ -1,5 +1,5 @@
 <h1 align="center">
-<em>Asearcher</em>: An Open-Source Large-Scale
+<em>ASearcher</em>: An Open-Source Large-Scale
 Reinforcement Learning Project for Search Agents
 </h1>
 
