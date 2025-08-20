@@ -12,11 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+奖励计算工具模块
+
+核心功能：
+1. 答案标准化处理（去除冠词、标点、空格等）
+2. 多种评分方法（EM、F1、SubEM等）
+3. 中英文答案的统一处理
+4. 格式检查（确保XML标签正确）
+
+这是ASearcher RL训练的核心评分模块，用于计算agent回答的奖励值
+"""
 import re
 import string
 import random
 
 def normalize_answer(s):
+    """
+    答案标准化处理函数
+    
+    处理步骤：
+    1. 转换为小写
+    2. 去除标点符号
+    3. 移除冠词（a, an, the）
+    4. 规范化空格
+    
+    用于在比较答案前进行预处理，消除格式差异
+    """
     def remove_articles(text):
         return re.sub(r"\b(a|an|the)\b", " ", text)
 
@@ -33,6 +55,12 @@ def normalize_answer(s):
     return white_space_fix(remove_articles(remove_punc(lower(s))))
 
 def bool_mapping(s):
+    """
+    布尔值映射为自然语言
+    
+    将程序输出的 True/False 转换为自然语言的 yes/no
+    用于处理程序化答案与自然语言答案的对齐
+    """
     if s == "True":
         return "yes"
     elif s == "False":
@@ -68,6 +96,15 @@ def contains_chinese(text):
     return False
 
 def em_check(prediction, golden_answers):
+    """
+    精确匹配（Exact Match）检查
+    
+    比较预测答案与标准答案是否完全一致（经过标准化后）
+    支持多个标准答案，只要匹配其中一个即可得分
+    
+    Returns:
+        1 如果匹配，0 如果不匹配
+    """
     if isinstance(golden_answers, str):
         golden_answers = [golden_answers]
     normalized_prediction = normalize_answer(bool_mapping(prediction))
@@ -94,30 +131,45 @@ def subem_check(prediction, golden_answers):
 
 
 def extract_solution(solution_str):
-    """Extract the equation from the solution string."""
-    # Remove everything before the first "Assistant:"
-    # if "Assistant:" in solution_str:
-    #     solution_str = solution_str.split("Assistant:", 1)[1]
-    # elif "<|im_start|>assistant" in solution_str:
-    #     solution_str = solution_str.split("<|im_start|>assistant", 1)[1]
-    # else:
-    #     return None
-    # solution_str = solution_str.split('\n')[-1]
-
+    """
+    从LLM生成的文本中提取最终答案
+    
+    查找 <answer>...</answer> 标签中的内容
+    如果有多个answer标签，返回最后一个（最终答案）
+    
+    这是ASearcher的关键函数：从agent的输出中提取用于评分的答案
+    
+    Returns:
+        提取的答案文本，如果没有找到则返回None
+    """
     answer_pattern = r'<answer>(.*?)</answer>'
     match = re.finditer(answer_pattern, solution_str, re.DOTALL)
     matches = list(match)
     
-    # If there are 0 or exactly 1 matches, return None
-    if len(matches) <= 0: #1:
+    # 没有找到answer标签
+    if len(matches) <= 0:
         return None
     
-    # If there are 2 or more matches, return the last one
+    # 返回最后一个answer标签的内容（最终答案）
     return matches[-1].group(1).strip()
 
 
 def compute_score_em(solution_str, ground_truth, method='strict', format_score=0., score=1.):
+    """
+    计算精确匹配（EM）分数
     
+    Args:
+        solution_str: agent生成的完整文本
+        ground_truth: 标准答案（可以是字符串或列表）
+        method: 评分方法（'strict'）
+        format_score: 格式错误的分数（默认0）
+        score: 正确答案的分数（默认1）
+    
+    Returns:
+        (提取的答案, 得分)
+    
+    这是PPO训练中计算奖励的核心函数之一
+    """
     if isinstance(ground_truth, list):
         answer = extract_solution(solution_str=solution_str)
         return answer, max([compute_score_em(solution_str, g)[1] for g in ground_truth])
@@ -180,13 +232,26 @@ def normalize_text(text: str) -> str:
     return text
 
 def f1_score(answer_content, gt):
+    """
+    计算F1分数（词级别的重叠度）
+    
+    F1 = 2 * (precision * recall) / (precision + recall)
+    - precision: 预测答案中正确词的比例
+    - recall: 标准答案中被覆盖词的比例
+    
+    特殊处理：
+    - 中文答案：按字符分词，保留连续数字
+    - 英文答案：按空格分词
+    
+    这比EM更宽松，允许部分匹配，适合开放式问答
+    """
     answer_content = normalize_text(bool_mapping(answer_content))
     gt = normalize_text(bool_mapping(gt))
 
     # 将答案和参考答案分词
     if contains_chinese(gt):
         def parse_chinese_str(s):
-            # parse consecutive numbers
+            # 提取连续数字作为独立token
             numbers = []
             for i, c in enumerate(s):
                 if c.isdigit():
@@ -194,6 +259,7 @@ def f1_score(answer_content, gt):
                         numbers[-1] = numbers[-1] + c
                     else:
                         numbers.append(c)
+            # 移除标点和数字，将字符作为token
             for c in "0123456789，。 ,.-":
                 s = s.replace(c, "")
             s = set(list(s) + numbers)
@@ -225,6 +291,19 @@ def f1_score(answer_content, gt):
 
 
 def compute_score_f1(solution_str, ground_truth, method='strict', format_score=0., score=1.):
+    """
+    计算F1分数（主要评分函数）
+    
+    F1分数比EM更宽松，适合：
+    - 答案较长的问题
+    - 允许部分匹配的场景
+    - 开放式问答任务
+    
+    Returns:
+        (提取的答案, F1分数[0-1])
+    
+    这是ASearcher默认使用的评分函数
+    """
     if isinstance(ground_truth, list):
         answer = extract_solution(solution_str=solution_str)
         return answer, max([compute_score_f1(solution_str, g)[1] for g in ground_truth])
@@ -257,16 +336,28 @@ def cover_exact_match_score_1(solution_str, ground_truth):
     return answer, float(all(ground in pre_list for ground in ground_list))
 
 def correct_format_fn(idx, s):
+    """
+    检查生成文本的格式是否正确
+    
+    格式要求：
+    1. XML标签必须成对出现（<search></search>, <access></access>, <answer></answer>）
+    2. 每次只能使用一个工具（search/access/answer总数<=1）
+    3. 不能包含"Assistant"等角色标记
+    4. </think>标签最多出现一次
+    
+    这个函数用于在训练时过滤格式错误的生成，避免奖励错误的行为
+    
+    Returns:
+        True如果格式正确，False如果有错误
+    """
     correct = all(
         [
-            s.count("<search>") == s.count("</search>"),
-            s.count("<access>") == s.count("</access>"),
-            s.count("<answer>") == s.count("</answer>"),
-            s.count("<search>") + s.count("<access>") + s.count("<answer>") <= 1,
-            # s.count("<information>") == s.count("</information>") == s.count("<|begin_of_documents|>") == s.count("<|end_of_documents|>") == 0,
-            s.count("Assistant") == s.count("assistant") == 0,
-            s.count("</think>") <= 1,
-           #  (s.strip().endswith("</search>") or s.strip().endswith("</answer>") or s.strip().endswith("</access>") or s.strip().endswith("</think>")),
+            s.count("<search>") == s.count("</search>"),  # search标签成对
+            s.count("<access>") == s.count("</access>"),  # access标签成对
+            s.count("<answer>") == s.count("</answer>"),  # answer标签成对
+            s.count("<search>") + s.count("<access>") + s.count("<answer>") <= 1,  # 一次只用一个工具
+            s.count("Assistant") == s.count("assistant") == 0,  # 不包含角色标记
+            s.count("</think>") <= 1,  # think标签最多一个
         ]
     )
     return correct

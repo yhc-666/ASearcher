@@ -1,3 +1,16 @@
+"""
+搜索引擎客户端工具模块
+
+提供两种搜索客户端实现：
+1. AsyncSearchBrowserClient: 连接本地RAG服务器（如local_retrieval_server.py）
+2. AsyncOnlineSearchClient: 连接在线搜索引擎（Serper API + Jina Reader）
+
+核心特性：
+- 全异步操作，高并发性能
+- 内置重试机制和错误处理
+- 网页缓存支持（减少重复访问）
+- 统一的API接口（query_async, access_async）
+"""
 import requests
 import random
 import time
@@ -26,14 +39,27 @@ SERPER_STATS = dict(
 )
 
 class AsyncSearchBrowserClient:
+    """
+    本地RAG服务器客户端
+    
+    连接到local_retrieval_server.py启动的FAISS/BM25检索服务
+    支持多服务器负载均衡和故障转移
+    
+    主要用于RAG场景，从local知识库检索文档
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.session = None
         self.server_list = self.get_server_list()
-        self.server_addr = random.choice(self.server_list)   
-        # print(self.server_list)     
+        self.server_addr = random.choice(self.server_list)     
 
     def get_server_list(self):
+        """
+        获取可用的RAG服务器地址列表
+        
+        从环境变量RAG_SERVER_ADDR_DIR指定的目录读取服务器地址
+        文件格式：Host*_IP*.txt，每行一个地址
+        """
         import glob
         rag_server_addr_dir = os.environ.get("RAG_SERVER_ADDR_DIR", "")
 
@@ -48,9 +74,21 @@ class AsyncSearchBrowserClient:
         return server_list
         
     async def query_async(self, req_meta: Dict[str, Any]) -> List[Dict]:
+        """
+        异步检索查询
+        
+        发送检索请求到RAG服务器的/retrieve端点
+        支持自动重试和服务器切换
+        
+        Args:
+            req_meta: 包含"queries"、"topk"等参数的请求字典
+            
+        Returns:
+            检索结果列表，包含documents和urls
+        """
         cnt = 0
         last_exception = None
-        while cnt < 10:
+        while cnt < 10:  # 最多重试10次
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.post(
@@ -79,9 +117,21 @@ class AsyncSearchBrowserClient:
         raise RuntimeError("Fail to post search query to RAG server") from last_exception
         
     async def access_async(self, urls: List[str]) -> List[Dict]:
+        """
+        异步访问文档内容
+        
+        发送访问请求到RAG服务器的/access端点
+        获取指定URL/文档ID的完整内容
+        
+        Args:
+            urls: 要访问的URL或文档ID列表
+            
+        Returns:
+            文档内容列表
+        """
         cnt = 0
         last_exception = None        
-        while cnt < 10:
+        while cnt < 10:  # 最多重试10次
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.post(
@@ -110,20 +160,31 @@ class AsyncSearchBrowserClient:
         raise RuntimeError("Fail to post access request to RAG server") from last_exception
 
 class AsyncOnlineSearchClient:
+    """
+    在线搜索引擎客户端
+    
+    使用Serper API进行网络搜索，使用Jina Reader读取网页内容
+    内置网页缓存、重试机制、并发控制
+    
+    核心功能：
+    1. Google搜索（通过Serper API）
+    2. 网页内容读取（通过Jina Reader API）
+    3. 结果缓存和并发控制
+    """
 
-    _search_semaphore = None
-    _access_semaphore = None
+    _search_semaphore = None  # 搜索并发控制
+    _access_semaphore = None  # 网页访问并发控制
     
     @classmethod
     def _get_search_semaphore(cls):
-
+        """获取搜索信号量，控制并发搜索数量（最多20个）"""
         if cls._search_semaphore is None:
             cls._search_semaphore = asyncio.Semaphore(20)
         return cls._search_semaphore
     
     @classmethod
     def _get_access_semaphore(cls):
-
+        """获取网页访问信号量，控制并发访问数量（最多10个）"""
         if cls._access_semaphore is None:
             cls._access_semaphore = asyncio.Semaphore(10)  
         return cls._access_semaphore
@@ -186,7 +247,18 @@ class AsyncOnlineSearchClient:
             return f"[visit] Failed to read page. Error: {str(e)}"
     
     async def query_async(self, req_meta):
-
+        """
+        异步搜索查询
+        
+        使用Serper API进行Google搜索
+        支持批量查询、自动重试、结果格式化
+        
+        Args:
+            req_meta: 包含"queries"和"topk"的请求字典
+            
+        Returns:
+            格式化的搜索结果，包含documents和urls
+        """
         import aiohttp
         
         queries = req_meta.get("queries", [])
@@ -196,9 +268,13 @@ class AsyncOnlineSearchClient:
             return []
         
         async def single_serper_query_async(session, query: str, topk: int) -> dict:
- 
-            query = query[:2000]
-            async with self._get_search_semaphore():
+            """
+            单个搜索查询的内部函数
+            
+            包含重试逻辑、错误处理、速率限制
+            """
+            query = query[:2000]  # 限制查询长度
+            async with self._get_search_semaphore():  # 并发控制
                 payload = {
                     "q": query,
                     "num": topk
@@ -294,7 +370,18 @@ class AsyncOnlineSearchClient:
                 return formatted_results  # return [[...], [...]]
 
     async def access_async(self, urls):
-
+        """
+        异步访问网页内容
+        
+        优先使用缓存，如果未命中则使用Jina Reader API读取
+        支持批量访问和结果缓存
+        
+        Args:
+            urls: 要访问的URL列表
+            
+        Returns:
+            网页内容列表
+        """
         if not urls:
             return []
         
@@ -387,13 +474,27 @@ class AsyncOnlineSearchClient:
 
 
 
+# 搜索客户端注册表
 SEARCH_CLIENTS = {
-    "async-search-access": AsyncSearchBrowserClient,
-    "async-online-search-access": AsyncOnlineSearchClient,
+    "async-search-access": AsyncSearchBrowserClient,  # 本地RAG服务器
+    "async-online-search-access": AsyncOnlineSearchClient,  # 在线搜索引擎
 }
 
 
-def make_search_client(search_client_type: str, use_jina: bool = False, jina_api_key: str = None):    
+def make_search_client(search_client_type: str, use_jina: bool = False, jina_api_key: str = None):
+    """
+    工厂函数：创建搜索客户端实例
+    
+    Args:
+        search_client_type: 客户端类型
+            - "async-search-access": 本地RAG服务器
+            - "async-online-search-access": 在线搜索引擎
+        use_jina: 是否使用Jina Reader读取网页
+        jina_api_key: Jina API密钥
+    
+    Returns:
+        搜索客户端实例
+    """
     if search_client_type == "async-online-search":
         return SEARCH_CLIENTS[search_client_type](use_jina=use_jina, jina_api_key=jina_api_key)
     elif search_client_type == "async-online-search-access":

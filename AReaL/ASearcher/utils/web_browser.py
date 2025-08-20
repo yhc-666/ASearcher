@@ -1,5 +1,18 @@
-# Shamelessly stolen from Microsoft Autogen team: thanks to them for this great resource!
-# https://github.com/microsoft/autogen/blob/gaia_multiagent_v01_march_1st/autogen/browser_utils.py
+"""
+网页缓存工具模块
+
+提供高效的网页内容缓存机制，减少重复的网络请求
+支持LRU淈汰策略、持久化存储、自动保存
+
+核心特性：
+1. LRU缓存策略（最近最少使用淈汰）
+2. 线程安全的并发访问
+3. 自动持久化到JSON文件
+4. 统计信息跟踪（命中率、淈汰次数等）
+
+来源：Microsoft Autogen团队的开源实现
+https://github.com/microsoft/autogen/blob/gaia_multiagent_v01_march_1st/autogen/browser_utils.py
+"""
 import atexit
 from collections import OrderedDict
 import hashlib
@@ -11,43 +24,65 @@ from typing import Any, Dict, Optional
 
        
 class WebPageCache:
+    """
+    网页内容LRU缓存
+    
+    使用OrderedDict实现LRU缓存，支持持久化存储
+    主要用于缓存Jina Reader或其他网页读取工具的结果
+    
+    Args:
+        max_size: 最大缓存条目数（默认100000）
+        cache_file: 缓存文件路径
+        save_interval: 每隔多少次操作自动保存
+    """
     
     def __init__(self, max_size: int = 100000, cache_file: str = "./webpage_cache.json", save_interval: int = 10):
         self.max_size = max_size
         self.cache_file = cache_file
-        self.cache = OrderedDict()
-        self.lock = threading.Lock()
-        self.stats = {"hits": 0, "misses": 0, "evictions": 0}
+        self.cache = OrderedDict()  # LRU缓存容器
+        self.lock = threading.Lock()  # 线程锁
+        self.stats = {"hits": 0, "misses": 0, "evictions": 0}  # 统计信息
         self.save_interval = save_interval
         self.operations_since_save = 0
         
-        self.load_from_file()
+        self.load_from_file()  # 启动时加载历史缓存
         
-        atexit.register(self.save_to_file)
+        atexit.register(self.save_to_file)  # 程序退出时自动保存
     
     def _generate_cache_key(self, url: str) -> str:
+        """生成URL的MD5哈希作为缓存键"""
         return hashlib.md5(url.encode()).hexdigest()
     
     def put(self, url: str, content: str):
+        """
+        将网页内容加入缓存
+        
+        如果缓存已满，会淈汰最久未使用的条目（LRU）
+        每隔save_interval次操作会触发后台保存
+        """
         if not url or not content:
             return
             
         cache_key = self._generate_cache_key(url)
         
         with self.lock:
+            # 如果已存在，先删除旧条目（用于更新LRU顺序）
             if cache_key in self.cache:
                 del self.cache[cache_key]
             
+            # LRU淈汰：如果缓存已满，删除最早的条目
             while len(self.cache) >= self.max_size:
-                self.cache.popitem(last=False)
+                self.cache.popitem(last=False)  # 删除最旧的
                 self.stats["evictions"] += 1
             
+            # 添加新条目到末尾（最新）
             self.cache[cache_key] = {
                 "url": url,
                 "content": content,
                 "timestamp": time.time()
             }
             
+            # 触发自动保存
             self.operations_since_save += 1
             if self.operations_since_save >= self.save_interval:
                 self.operations_since_save = 0
@@ -55,11 +90,19 @@ class WebPageCache:
                 threading.Thread(target=self._background_save, daemon=True).start()
     
     def get(self, url: str) -> Optional[str]:
+        """
+        从URL获取缓存的网页内容
+        
+        命中时会更新LRU顺序（移动到末尾）
+        
+        Returns:
+            缓存的内容，或None如果未命中
+        """
         cache_key = self._generate_cache_key(url)
         
         with self.lock:
             if cache_key in self.cache:
-                # 移动到末尾（最近使用）
+                # LRU更新：移动到末尾（标记为最近使用）
                 entry = self.cache.pop(cache_key)
                 self.cache[cache_key] = entry
                 self.stats["hits"] += 1
@@ -69,6 +112,7 @@ class WebPageCache:
                 return None
     
     def has(self, url: str) -> bool:
+        """检查URL是否在缓存中（不更新LRU顺序）"""
         cache_key = self._generate_cache_key(url)
         with self.lock:
             return cache_key in self.cache
@@ -84,6 +128,12 @@ class WebPageCache:
         self.operations_since_save = 0
     
     def get_stats(self) -> Dict[str, Any]:
+        """
+        获取缓存统计信息
+        
+        Returns:
+            包含命中率、淈汰次数等统计数据的字典
+        """
         with self.lock:
             total_requests = self.stats["hits"] + self.stats["misses"]
             hit_rate = self.stats["hits"] / total_requests if total_requests > 0 else 0
@@ -105,8 +155,17 @@ class WebPageCache:
             print(f"[ERROR] WebPageCache: Background save failed: {e}")
 
     def save_to_file(self):
+        """
+        将缓存保存到JSON文件
+        
+        保存内容包括：
+        - 有序的缓存条目（保留LRU顺序）
+        - 统计信息
+        - 保存时间戳
+        """
         try:
             with self.lock:
+                # 保留顺序：转换为列表以保存LRU顺序
                 ordered_cache = []
                 for key, value in self.cache.items():
                     ordered_cache.append((key, value))
@@ -127,7 +186,13 @@ class WebPageCache:
             print(f"[ERROR] WebPageCache: Failed to save cache to {self.cache_file}: {e}")
     
     def load_from_file(self):
-        """从JSON文件加载缓存"""
+        """
+        从JSON文件加载缓存
+        
+        支持两种格式：
+        1. cache_ordered: 保留LRU顺序的新格式
+        2. cache: 旧格式（不保留LRU顺序）
+        """
         if not os.path.exists(self.cache_file):
             print(f"[DEBUG] WebPageCache: No existing cache file {self.cache_file}, starting fresh")
             return
