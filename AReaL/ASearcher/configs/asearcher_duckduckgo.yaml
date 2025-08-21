@@ -1,4 +1,4 @@
-experiment_name: asearcher-7b-zero-web
+experiment_name: asearcher-7b-zero-duckduckgo
 trial_name: run1
 
 cluster:
@@ -151,9 +151,14 @@ launcher:
   slurm:
 
 
+# ASearcher specific parameters - Using DuckDuckGo + Free Jina Reader
 max_turns: 32
 n_trajs: 16
-search_client_type: async-online-search-access # async-duckduckgo-search
+search_client_type: async-duckduckgo-search  # 使用免费的 DuckDuckGo 搜索
 reward_type: F1
 topk: 5
 valid_inst_ratio: 0.3
+
+# Note: No API keys required for DuckDuckGo and free Jina Reader!
+# Before running, ensure ddgs package is installed:
+# pip install ddgs

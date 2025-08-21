@@ -241,7 +241,7 @@ class ASearcherWorkflow(RolloutWorkflow):
                     logprobs=torch.tensor(logprobs).unsqueeze(0),       # 对数概率
                     versions=torch.tensor(versions).unsqueeze(0),       # 模型版本
                     attention_mask=torch.ones(len(seq), dtype=torch.bool).unsqueeze(0),
-                    rewards=torch.tensor([float(scores[i])]),           # 归一化奖励
+                    rewards=torch.tensor([float(scores[i])]),           # 归一化奖励 (同一个traj内，每个round的reward一样)
                 )
                 # 标记轨迹开始 (用于 PPO 的 advantage 计算)
                 if first_llm_gen:

@@ -1,3 +1,16 @@
 {
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:github.com)",
+      "Bash(conda:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/haochengyang"
+    ]
+  },
   "outputStyle": "Explanatory"
 }
