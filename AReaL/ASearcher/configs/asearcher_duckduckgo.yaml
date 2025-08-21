@@ -144,11 +144,10 @@ stats_logger:
 
 # Launcher
 launcher:
-  inference_server_cpus_per_gpu: 15
-  inference_server_mem_per_gpu: 153600
-  trainer_cpus_per_gpu: 15
-  trainer_mem_per_gpu: 153600
-  slurm:
+  inference_server_cpus_per_gpu: 6
+  inference_server_mem_per_gpu: 100000
+  trainer_cpus_per_gpu: 6
+  trainer_mem_per_gpu: 100000
 
 
 # ASearcher specific parameters - Using DuckDuckGo + Free Jina Reader
