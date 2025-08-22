@@ -111,7 +111,7 @@ train_dataset:
   batch_size: 64  # Reduced for local setup
   shuffle: true
   pin_memory: true
-  path: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-mtsearch-assistant/ai-search/yanghaocheng04/ASearcher/training_data
+  path: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-mtsearch-assistant/ai-search/yanghaocheng04/ASearcher/train_data
 
 # Utilities
 saver:
