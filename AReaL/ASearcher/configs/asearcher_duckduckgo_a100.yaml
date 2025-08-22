@@ -1,0 +1,168 @@
+experiment_name: asearcher-qwn3-8b-duckduckgo-a100
+trial_name: run1
+
+cluster:
+  fileroot: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-mtsearch-assistant/ai-search/yanghaocheng04/ASearcher/experiments
+  n_nodes: 1
+  n_gpus_per_node: 8
+  name_resolve:
+    type: nfs
+    nfs_record_root: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-mtsearch-assistant/ai-search/yanghaocheng04/ASearcher/name_resolve
+seed: 1
+total_train_epochs: 10
+total_train_steps: null
+tokenizer_path: ${actor.path}
+# Optimal allocation for A100-80GB: 4 GPUs for SGLang, 4 for training
+allocation_mode: sglang.d4p1t1+d4p1t1
+async_training: true
+
+rollout:
+  experiment_name: ${experiment_name}
+  trial_name: ${trial_name}
+  max_concurrent_rollouts: 128  # Full capacity for A100s
+  queue_size: null
+  consumer_batch_size: ${train_dataset.batch_size}
+  max_head_offpolicyness: 4
+  enable_rollout_tracing: true
+
+gconfig:
+  n_samples: 16  # Full sampling for A100s
+  min_new_tokens: 0
+  max_new_tokens: 2048  # Increased for A100s
+  greedy: false
+  temperature: 1.0
+
+actor:
+  experiment_name: ${experiment_name}
+  trial_name: ${trial_name}
+  path: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-mtsearch-assistant/ai-search/deepsearch_files/LLMbasemodels/huggingface.co/Qwen/Qwen3-8B
+  init_from_scratch: false
+  disable_dropout: true
+  gradient_checkpointing: false  # A100s have enough memory
+  dtype: bfloat16
+  mb_spec:
+    max_tokens_per_mb: 16384  # Increased for A100s
+  optimizer:
+    type: adam
+    lr: 5e-6
+    weight_decay: 0.01
+    beta1: 0.9
+    beta2: 0.999
+    eps: 1e-8
+    lr_scheduler_type: constant
+    gradient_clipping: 1.0
+    warmup_steps_proportion: 0.001
+  backend: fsdp
+
+  group_size: ${gconfig.n_samples}
+  group_adv_norm: false
+  eps_clip: 0.4
+  temperature: ${gconfig.temperature}
+  reward_scaling: 10.0
+  reward_bias: -0.5
+  kl_ctl: 0.0
+  ppo_n_minibatches: 1
+  recompute_logprob: true
+  use_decoupled_loss: true
+  behav_imp_weight_cap: 5.0
+  log_agent_stats: true
+  log_agent_stats_keys: 
+    - num_input_tokens
+    - num_output_tokens
+    - num_llm_gens
+    - num_search_queries
+    - num_success_search_queries
+    - num_failed_search_queries
+    - num_pages
+    - num_success_url_accesses
+    - num_failed_url_accesses
+    - score
+    - judge_q_invalid
+    - format_reward
+
+ref:
+  experiment_name: ${experiment_name}
+  trial_name: ${trial_name}
+  path: ${actor.path}
+  init_from_scratch: false
+  disable_dropout: true
+  dtype: ${actor.dtype}
+  mb_spec:
+    max_tokens_per_mb: 65536  # Maximum for A100s
+  optimizer: null
+  backend: fsdp
+
+# SGLang - Full capacity settings for A100-80GB
+server_only: false
+sglang:
+  model_path: ${actor.path}
+  random_seed: ${seed}
+  skip_tokenizer_init: false
+  dtype: ${actor.dtype}
+  max_running_requests: null
+  context_length: 32768  # Full 32K context for A100s
+  mem_fraction_static: 0.95  # Can use most memory on A100s
+  attention_backend: fa3  # FlashAttention 3 for A100s
+  # A100-specific optimizations
+  enable_flashinfer_cutlass_moe: true
+  triton_attention_reduce_in_fp32: false  # A100s handle bf16 well
+  triton_attention_num_kv_splits: 16  # More splits for A100s
+  num_continuous_decode_steps: 4  # More aggressive batching
+
+# datasets
+train_dataset:
+  batch_size: 128  # Full batch size for A100s
+  shuffle: true
+  pin_memory: true
+  path: train_data/ASearcher-Base-35k.jsonl
+
+# Utilities
+saver:
+  experiment_name: ${experiment_name}
+  trial_name: ${trial_name}
+  fileroot: ${cluster.fileroot}
+  freq_epochs: 1
+  freq_steps: 10
+  freq_secs: 3600
+
+checkpointer:
+  experiment_name: ${experiment_name}
+  trial_name: ${trial_name}
+  fileroot: ${cluster.fileroot}
+  freq_epochs: 1
+  freq_steps: null
+  freq_secs: 3600
+
+evaluator:
+  experiment_name: ${experiment_name}
+  trial_name: ${trial_name}
+  fileroot: ${cluster.fileroot}
+  freq_epochs: null
+  freq_steps: null
+  freq_secs: null
+
+stats_logger:
+  experiment_name: ${experiment_name}
+  trial_name: ${trial_name}
+  fileroot: ${cluster.fileroot}
+  wandb:
+    mode: online
+
+# Launcher - A100 optimized
+launcher:
+  inference_server_cpus_per_gpu: 20  # More CPUs for A100s
+  inference_server_mem_per_gpu: 204800  # More RAM for A100s
+  trainer_cpus_per_gpu: 20
+  trainer_mem_per_gpu: 204800
+
+# ASearcher specific parameters - Full capacity
+max_turns: 32
+n_trajs: 16
+search_client_type: async-duckduckgo-search
+reward_type: F1
+topk: 5
+valid_inst_ratio: 0.3
+
+# Note: No API keys required for DuckDuckGo and free Jina Reader!
+# Before running, ensure ddgs package is installed:
+# pip install ddgs
