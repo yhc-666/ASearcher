@@ -21,14 +21,14 @@ async_training: true
 rollout:
   experiment_name: ${experiment_name}
   trial_name: ${trial_name}
-  max_concurrent_rollouts: 64  # Reduced for local setup
+  max_concurrent_rollouts: 128  # Match asearcher_local.yaml
   queue_size: null
   consumer_batch_size: ${train_dataset.batch_size}
   max_head_offpolicyness: 4
   enable_rollout_tracing: true
 
 gconfig:
-  n_samples: 8  # Reduced for local setup
+  n_samples: 16  # Match asearcher_local.yaml
   min_new_tokens: 0
   max_new_tokens: 1024
   greedy: false
@@ -108,7 +108,7 @@ sglang:
 
 # datasets
 train_dataset:
-  batch_size: 64  # Reduced for local setup
+  batch_size: 128  # Match asearcher_local.yaml
   shuffle: true
   pin_memory: true
   path: train_data/ASearcher-Base-35k.jsonl
@@ -155,7 +155,7 @@ launcher:
 
 # ASearcher specific parameters - Using DuckDuckGo + Free Jina Reader
 max_turns: 32
-n_trajs: 8  # Reduced for local setup
+n_trajs: 16  # Match asearcher_local.yaml
 search_client_type: async-duckduckgo-search  # Free DuckDuckGo search
 reward_type: F1
 topk: 5
