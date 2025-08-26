@@ -105,7 +105,8 @@ sglang:
   context_length: 32768
   mem_fraction_static: 0.9
   attention_backend: fa3
-  torchao_config: ""  # Explicitly disable torchao to avoid compatibility issues
+  torchao_config: null  # Completely disable torchao - use null instead of empty string
+  disable_torchao: true  # Additional flag to force disable
 
 # datasets
 train_dataset:
