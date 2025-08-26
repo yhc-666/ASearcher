@@ -26,6 +26,7 @@ rollout:
   consumer_batch_size: ${train_dataset.batch_size}
   max_head_offpolicyness: 4
   enable_rollout_tracing: true
+  setup_timeout: 300.0  # Increased timeout to 5 minutes for Qwen3-8B model loading
 
 gconfig:
   n_samples: 16  # Match asearcher_local.yaml
@@ -105,6 +106,7 @@ sglang:
   context_length: 32768
   mem_fraction_static: 0.9
   attention_backend: fa3
+  quantization: None
 
 # datasets
 train_dataset:
