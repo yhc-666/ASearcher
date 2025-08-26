@@ -148,6 +148,10 @@ except Exception as e:
                         print(f"     {line}")
             elif result.returncode == -11:
                 print(f"   ✗ 段错误 - 问题出现在这一步!")
+                if result.stderr:
+                    print("   错误输出:")
+                    for line in result.stderr.strip().split('\n')[:5]:
+                        print(f"     {line}")
                 return step['name']
             else:
                 print(f"   ✗ 失败 (退出码: {result.returncode})")
