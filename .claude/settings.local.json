@@ -6,7 +6,11 @@
       "WebFetch(domain:github.com)",
       "Bash(conda:*)",
       "Bash(pip install:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(env)",
+      "Bash(pip show:*)",
+      "Bash(cp:*)"
     ],
     "additionalDirectories": [
       "/Users/haochengyang"
