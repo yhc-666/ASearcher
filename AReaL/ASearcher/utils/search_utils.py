@@ -25,7 +25,7 @@ import asyncio
 from typing import Dict, List, Any
 
 try:
-    from tools.web_browser import WebPageCache
+    from .web_browser import WebPageCache
     WEBPAGECACHE_AVAILABLE = True
 except ImportError as e:
     print(f"[WARNING] import web browser error: {e}")
