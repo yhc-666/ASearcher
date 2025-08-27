@@ -105,7 +105,9 @@ sglang:
   max_running_requests: null
   context_length: 32768
   mem_fraction_static: 0.9
-  attention_backend: fa3
+  attention_backend: flashinfer #fa3
+  log_level: debug
+  enable_metrics: false 
 
 # datasets
 train_dataset:

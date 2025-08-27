@@ -14,7 +14,8 @@
       "Bash(git log:*)",
       "Bash(find:*)",
       "Bash(git fetch:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(grep:*)"
     ],
     "additionalDirectories": [
       "/Users/haochengyang"
