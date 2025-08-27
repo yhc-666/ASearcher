@@ -10,7 +10,10 @@
       "Bash(curl:*)",
       "Bash(env)",
       "Bash(pip show:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(git log:*)",
+      "Bash(find:*)",
+      "Bash(git fetch:*)"
     ],
     "additionalDirectories": [
       "/Users/haochengyang"

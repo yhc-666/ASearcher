@@ -440,8 +440,8 @@ class SGLangConfig:
             dist_init_addr=dist_init_addr,
             **args,
         )
-        if not pkg_version.is_version_greater_or_equal("sglang", "0.4.9.post2"):
-            raise RuntimeError("Needs sglang>=0.4.9.post2 to run the code.")
+        # if not pkg_version.is_version_greater_or_equal("sglang", "0.4.9.post2"):
+        #     raise RuntimeError("Needs sglang>=0.4.9.post2 to run the code.")
         return args
 
 

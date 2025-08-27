@@ -106,7 +106,6 @@ sglang:
   context_length: 32768
   mem_fraction_static: 0.9
   attention_backend: fa3
-  quantization: None
 
 # datasets
 train_dataset:
